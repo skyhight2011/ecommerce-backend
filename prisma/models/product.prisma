@@ -1,0 +1,146 @@
+// Category Model - Hierarchical category system
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  image       String?  // URL to category image
+  icon        String?  // Icon identifier
+  
+  // Hierarchy
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  
+  // SEO and display
+  metaTitle       String?
+  metaDescription String?
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  products Product[]
+  
+  @@map("categories")
+}
+
+// Product Model - Comprehensive product management
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  shortDescription String?
+  
+  // Pricing
+  price       Decimal  @db.Decimal(10, 2)
+  comparePrice Decimal? @db.Decimal(10, 2) // Original price for discounts
+  costPrice   Decimal?  @db.Decimal(10, 2) // Cost for profit calculation
+  
+  // Inventory
+  sku         String?   @unique
+  barcode     String?   @unique
+  trackQuantity Boolean @default(true)
+  quantity    Int      @default(0)
+  lowStockThreshold Int @default(5)
+  
+  // Product details
+  weight      Decimal?  @db.Decimal(8, 2) // in kg
+  dimensions  Json?     // {length, width, height} in cm
+  material    String?
+  brand       String?
+  
+  // Status and visibility
+  status      ProductStatus @default(DRAFT)
+  isActive    Boolean  @default(true)
+  isDigital   Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  publishedAt DateTime?
+  
+  // Relations
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  images     ProductImage[]
+  variants   ProductVariant[]
+  attributes ProductAttribute[]
+  reviews    Review[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+  wishlistItems WishlistItem[]
+  
+  @@map("products")
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  OUT_OF_STOCK
+}
+
+// Product Images
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@map("product_images")
+}
+
+// Product Variants (size, color, etc.)
+model ProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  name      String   // e.g., "Red - Large"
+  sku       String?  @unique
+  price     Decimal? @db.Decimal(10, 2) // Override product price
+  quantity  Int      @default(0)
+  attributes Json    // {color: "red", size: "large"}
+  isActive  Boolean  @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+  
+  @@map("product_variants")
+}
+
+// Product Attributes (customizable attributes)
+model ProductAttribute {
+  id        String   @id @default(cuid())
+  productId String
+  name      String   // e.g., "Color", "Size", "Material"
+  value     String   // e.g., "Red", "Large", "Cotton"
+  sortOrder Int      @default(0)
+  
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@map("product_attributes")
+}

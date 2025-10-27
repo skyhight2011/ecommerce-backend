@@ -1,0 +1,163 @@
+// Order Model - Complete order management system
+model Order {
+  id          String   @id @default(cuid())
+  orderNumber String   @unique // Human-readable order number
+  userId      String
+  
+  // Order status and tracking
+  status      OrderStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
+  
+  // Pricing
+  subtotal   Decimal  @db.Decimal(10, 2)
+  taxAmount  Decimal  @db.Decimal(10, 2) @default(0)
+  shippingAmount Decimal @db.Decimal(10, 2) @default(0)
+  discountAmount Decimal @db.Decimal(10, 2) @default(0)
+  total      Decimal  @db.Decimal(10, 2)
+  
+  // Currency
+  currency   String   @default("USD")
+  
+  // Customer information
+  customerEmail String
+  customerPhone String?
+  
+  // Addresses
+  shippingAddressId String?
+  billingAddressId  String?
+  
+  // Shipping
+  shippingMethod    String?
+  trackingNumber    String?
+  estimatedDelivery DateTime?
+  
+  // Notes and metadata
+  notes     String?
+  metadata  Json?   // Additional order data
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shippedAt DateTime?
+  deliveredAt DateTime?
+  
+  // Relations
+  user            User            @relation(fields: [userId], references: [id])
+  shippingAddress Address?        @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress  Address?        @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  items           OrderItem[]
+  payments        Payment[]
+  refunds         Refund[]
+  
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  REFUNDED
+  PARTIALLY_REFUNDED
+  FAILED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  PARTIALLY_RETURNED
+  RETURNED
+}
+
+// Order Items
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  variantId String?
+  
+  // Product details at time of order
+  productName String
+  productSku  String?
+  variantName String?
+  
+  // Pricing
+  price     Decimal  @db.Decimal(10, 2)
+  quantity  Int
+  total     Decimal  @db.Decimal(10, 2)
+  
+  // Relations
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+  
+  @@map("order_items")
+}
+
+// Shopping Cart
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String?  // Null for guest carts
+  sessionId String?  // For guest carts
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime? // For guest carts
+  
+  // Relations
+  user  User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+  
+  @@map("carts")
+}
+
+// Cart Items
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  variantId String?
+  
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2) // Price at time of adding to cart
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  cart    Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+  
+  @@map("cart_items")
+}
+
+// Wishlist
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}

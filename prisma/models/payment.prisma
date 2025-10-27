@@ -1,0 +1,108 @@
+// Payment Models - Comprehensive payment management
+model Payment {
+  id          String   @id @default(cuid())
+  orderId     String
+  
+  // Payment details
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  method      PaymentMethodType
+  status      PaymentStatus @default(PENDING)
+  
+  // External payment provider data
+  provider    String?  // stripe, paypal, etc.
+  providerId  String?  // External payment ID
+  providerData Json?   // Additional provider-specific data
+  
+  // Transaction details
+  transactionId String?
+  gatewayResponse Json? // Raw gateway response
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  processedAt DateTime?
+  
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("payments")
+}
+
+enum PaymentMethodType {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  STRIPE
+  BANK_TRANSFER
+  CASH_ON_DELIVERY
+  WALLET
+  CRYPTOCURRENCY
+}
+
+// Payment Methods (saved payment methods)
+model PaymentMethod {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  // Payment method details
+  type      PaymentMethodType
+  provider  String   // stripe, paypal, etc.
+  providerId String  // External payment method ID
+  
+  // Card details (for cards)
+  last4     String?  // Last 4 digits
+  brand    String?  // visa, mastercard, etc.
+  expMonth Int?
+  expYear  Int?
+  
+  // Billing address
+  billingAddressId String?
+  
+  // Status
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingAddress Address? @relation(fields: [billingAddressId], references: [id])
+  
+  @@map("payment_methods")
+}
+
+// Refunds
+model Refund {
+  id        String   @id @default(cuid())
+  orderId   String
+  
+  // Refund details
+  amount    Decimal  @db.Decimal(10, 2)
+  reason    String?
+  status    RefundStatus @default(PENDING)
+  
+  // External refund data
+  providerId String?  // External refund ID
+  providerData Json? // Provider-specific data
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  processedAt DateTime?
+  
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("refunds")
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}

@@ -1,0 +1,57 @@
+// Coupons and Discounts Models
+model Coupon {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  
+  // Discount details
+  type        DiscountType
+  value       Decimal  @db.Decimal(10, 2)
+  minOrderAmount Decimal? @db.Decimal(10, 2)
+  maxDiscountAmount Decimal? @db.Decimal(10, 2)
+  
+  // Usage limits
+  usageLimit  Int?
+  usedCount   Int      @default(0)
+  usageLimitPerUser Int? @default(1)
+  
+  // Validity
+  isActive    Boolean  @default(true)
+  startsAt    DateTime?
+  expiresAt   DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  usages CouponUsage[]
+  
+  @@map("coupons")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
+}
+
+// Coupon Usage Tracking
+model CouponUsage {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String?
+  orderId   String?
+  
+  // Usage details
+  discountAmount Decimal @db.Decimal(10, 2)
+  
+  // Timestamps
+  usedAt DateTime @default(now())
+  
+  // Relations
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  
+  @@map("coupon_usages")
+}
