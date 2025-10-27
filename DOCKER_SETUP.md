@@ -71,8 +71,11 @@ docker-compose down
 
 ### Database Operations
 ```bash
-# Connect to PostgreSQL
+# Connect to PostgreSQL (Development)
 docker-compose exec postgres psql -U ecommerce_user -d ecommerce_dev
+
+# Connect to PostgreSQL (Production)
+docker-compose -f docker-compose.prod.yml exec postgres psql -U ecommerce_user -d ecommerce_prod
 
 # Connect to Redis
 docker-compose exec redis redis-cli
@@ -99,6 +102,26 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 ```
 
+## Architecture Details
+
+### Multi-Stage Dockerfile
+- **Base Stage**: Node.js 20 Alpine with pnpm
+- **Development Stage**: Hot reload with volume mounting
+- **Build Stage**: TypeScript compilation
+- **Production Stage**: Optimized, secure runtime with non-root user
+
+### Security Features
+- Non-root user execution in production
+- Health checks for all services
+- Network isolation with custom bridge
+- Optimized build context with `.dockerignore`
+
+### Database Setup
+- PostgreSQL 18 with Alpine Linux
+- Automatic database initialization
+- UUID and crypto extensions enabled
+- Persistent data volumes
+
 ## Troubleshooting
 
 ### Docker Not Running
@@ -118,6 +141,23 @@ ports:
   - "3003:3000"  # Change host port to 3003
 ```
 
+### Volume Mounting Issues
+If you encounter volume mounting errors (common after Docker updates):
+
+```bash
+# Stop and remove all containers and volumes
+docker-compose down -v
+
+# Clean up Docker system
+docker system prune -f
+
+# Rebuild and restart
+docker-compose up --build -d
+```
+
+### Docker Compose Version Warning
+The `version` field in docker-compose files is obsolete. Our configuration files have been updated to remove this field to avoid warnings.
+
 ### Clean Up
 ```bash
 # Remove containers and volumes
@@ -130,9 +170,22 @@ docker rmi ecommerce-backend-dev ecommerce-backend-prod
 docker system prune -a
 ```
 
+## Access Points
+
+### Development Environment
+- **Application**: http://localhost:3001
+- **PostgreSQL**: localhost:5433
+- **Redis**: localhost:6380
+
+### Production Environment
+- **Application**: http://localhost:3002
+- **PostgreSQL**: localhost:5434
+- **Redis**: localhost:6381
+
 ## Next Steps
 
 1. Start Docker Desktop
 2. Run `docker-compose up --build` to start development environment
 3. Access your application at http://localhost:3001
 4. Check logs with `docker-compose logs -f app`
+5. Connect to database: `docker-compose exec postgres psql -U ecommerce_user -d ecommerce_dev`

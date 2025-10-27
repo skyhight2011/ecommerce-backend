@@ -1,0 +1,29 @@
+// Category Model - Hierarchical category system
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  image       String?  // URL to category image
+  icon        String?  // Icon identifier
+  
+  // Hierarchy
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  
+  // SEO and display
+  metaTitle       String?
+  metaDescription String?
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  products Product[]
+  
+  @@map("categories")
+}

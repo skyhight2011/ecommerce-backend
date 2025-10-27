@@ -1,0 +1,84 @@
+// User Model - Comprehensive user management with authentication and profiles
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String?  @unique
+  password  String   // Hashed password
+  firstName String?
+  lastName  String?
+  phone     String?
+  avatar    String?  // URL to avatar image
+  
+  // Account status and verification
+  isActive     Boolean   @default(true)
+  isVerified   Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  
+  // Role-based access control
+  role        UserRole  @default(CUSTOMER)
+  permissions String[]   @default([]) // JSON array of permissions
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLoginAt DateTime?
+    
+  // Relations
+  addresses     Address[]?
+  paymentMethods PaymentMethod[]?
+  orders        Order[]?
+  reviews       Review[]?
+  wishlist      WishlistItem[]?
+  cartItems     CartItem[]?
+  notifications Notification[]?
+  
+  // User preferences
+  preferences Json? // Store user preferences as JSON
+  
+  @@map("users")
+}
+
+// User roles enum
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  MODERATOR
+  VENDOR
+  SUPPORT
+}
+
+// Address model for shipping and billing
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  type        AddressType @default(SHIPPING)
+  firstName   String
+  lastName    String
+  company     String?
+  address1    String
+  address2    String?
+  city        String
+  state       String?
+  postalCode  String
+  country     String
+  phone       String?
+  isDefault   Boolean  @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders      Order[]  @relation("ShippingAddress")
+  billingOrders Order[] @relation("BillingAddress")
+  
+  @@map("addresses")
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+  BOTH
+}
