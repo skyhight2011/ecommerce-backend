@@ -30,6 +30,12 @@ CMD ["pnpm", "run", "start:dev"]
 FROM base AS build
 WORKDIR /app
 
+# Copy Prisma schema for generation
+COPY prisma ./prisma
+
+# Generate Prisma Client
+RUN pnpm prisma generate
+
 # Copy source code
 COPY . .
 
@@ -54,6 +60,10 @@ COPY package.json pnpm-lock.yaml ./
 
 # Install only production dependencies
 RUN pnpm install --frozen-lockfile --prod
+
+# Copy Prisma schema and generate client
+COPY prisma ./prisma
+RUN pnpm prisma generate
 
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist

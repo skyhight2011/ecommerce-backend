@@ -11,6 +11,14 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - DATABASE_URL=postgresql://ecommerce_user:ecommerce_password@postgres:5432/ecommerce_dev
+      - JWT_SECRET=your-secret-key-change-in-production
+      - JWT_EXPIRES_IN=1d
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
       # Mount source code for hot reload
       - ./src:/app/src
