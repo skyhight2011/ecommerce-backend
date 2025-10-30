@@ -11,6 +11,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - DATABASE_URL=postgresql://ecommerce_user:ecommerce_password@postgres:5432/ecommerce_prod
+      - JWT_SECRET=your-secret-key-change-in-production
+      - JWT_EXPIRES_IN=1d
     networks:
       - ecommerce-network
     restart: unless-stopped
