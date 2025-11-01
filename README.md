@@ -53,7 +53,9 @@ Required keys (via `.env` or environment):
 ```
 JWT_SECRET=your-strong-secret
 JWT_EXPIRES_IN=7d
-DATABASE_URL=postgresql://user:password@localhost:5432/ecommerce?schema=public
+# When running locally (outside Docker), use port 5433 (mapped from Docker)
+DATABASE_URL=postgresql://ecommerce_user:ecommerce_password@localhost:5433/ecommerce_dev?schema=public
+# When running in Docker, use: postgresql://ecommerce_user:ecommerce_password@postgres:5432/ecommerce_dev?schema=public
 APP_PORT=3000
 NODE_ENV=development
 ```
