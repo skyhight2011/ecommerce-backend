@@ -11,7 +11,7 @@ model User {
   
   // Account status and verification
   isActive     Boolean   @default(true)
-  isVerified   Boolean   @default(false)
+  isVerified   Boolean   @default(true)
   emailVerifiedAt DateTime?
   phoneVerifiedAt DateTime?
   

@@ -1,4 +1,4 @@
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -19,11 +19,16 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({
     status: 200,
     description: 'Users retrieved successfully',
     type: [UserResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
   })
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userService.findAll();
@@ -31,11 +36,16 @@ export class UserController {
   }
 
   @Get(':id')
+  @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Get a user by id' })
   @ApiResponse({
     status: 200,
     description: 'User retrieved successfully',
     type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
   })
   async findById(@Param('id') id: string): Promise<UserResponseDto> {
     if (!id) {
@@ -74,11 +84,16 @@ export class UserController {
   }
 
   @Put(':id')
+  @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Update a user' })
   @ApiResponse({
     status: 200,
     description: 'User updated successfully',
     type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
   })
   async updateUser(
     @Param('id') id: string,
