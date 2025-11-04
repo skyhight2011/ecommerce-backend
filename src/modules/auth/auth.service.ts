@@ -71,17 +71,17 @@ export class AuthService {
       where: { email: loginDto.email },
     });
 
-    if (!user) {
+    if (!user?.email) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Check if account is active
-    if (!user.isActive) {
+    if (!user?.isActive) {
       throw new UnauthorizedException('Account is not active');
     }
 
     // Check if account is verified (optional, depends on your requirements)
-    if (!user.isVerified) {
+    if (!user?.isVerified) {
       throw new UnauthorizedException('Please verify your email first');
     }
 

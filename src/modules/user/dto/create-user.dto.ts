@@ -124,4 +124,7 @@ export class CreateUserDto {
   })
   @IsOptional()
   preferences?: Record<string, any>;
+
+  @IsOptional()
+  isVerified?: boolean;
 }
