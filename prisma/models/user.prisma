@@ -16,7 +16,7 @@ model User {
   phoneVerifiedAt DateTime?
   
   // Role-based access control
-  role        UserRole  @default(CUSTOMER)
+  role        UserRole  @default(USER)
   permissions String[]   @default([]) // JSON array of permissions
   
   // Timestamps
@@ -41,11 +41,10 @@ model User {
 
 // User roles enum
 enum UserRole {
-  CUSTOMER
-  ADMIN
-  MODERATOR
+  SUPER_ADMIN
+  SUPPORT_ADMIN
+  USER
   VENDOR
-  SUPPORT
 }
 
 // Address model for shipping and billing

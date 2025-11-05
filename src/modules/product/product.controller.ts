@@ -30,7 +30,8 @@ import {
   ProductResponseDto,
   ProductStatus,
 } from './dto';
-import { Public } from '../auth/decorators';
+import { Public, Roles } from '../auth/decorators';
+import { UserRole } from 'src/modules/user/enums/user-role.enum';
 
 @ApiTags('products')
 @Controller('products')
@@ -155,6 +156,7 @@ export class ProductController {
   }
 
   @Post()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SUPPORT_ADMIN)
   @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponse({
@@ -182,6 +184,7 @@ export class ProductController {
   }
 
   @Put(':id')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SUPPORT_ADMIN)
   @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Update a product' })
   @ApiResponse({
@@ -208,6 +211,7 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SUPPORT_ADMIN)
   @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Delete (archive) a product' })
   @ApiResponse({
@@ -226,6 +230,7 @@ export class ProductController {
   }
 
   @Patch(':id/status')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SUPPORT_ADMIN)
   @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Update product status' })
   @ApiResponse({
@@ -254,6 +259,7 @@ export class ProductController {
   }
 
   @Patch(':id/quantity')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SUPPORT_ADMIN)
   @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Update product quantity' })
   @ApiResponse({

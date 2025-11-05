@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserRole } from 'src/modules/user/enums/user-role.enum';
 
 @Injectable()
 export class AuthService {
@@ -179,7 +180,7 @@ export class AuthService {
     return user;
   }
 
-  private generateToken(userId: string, email: string, role: string): string {
+  private generateToken(userId: string, email: string, role: UserRole): string {
     const payload = { sub: userId, email, role };
     return this.jwtService.sign(payload);
   }
