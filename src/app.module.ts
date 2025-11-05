@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.moudle';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProductModule } from './modules/product/product.module';
+import { OrderModule } from './modules/order/order.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { JwtAuthGuard, RolesGuard } from './modules/auth/guards';
 import configs from './config';
@@ -21,6 +22,7 @@ import configs from './config';
     UserModule,
     AuthModule,
     ProductModule,
+    OrderModule,
     AdminModule,
   ],
   controllers: [AppController],

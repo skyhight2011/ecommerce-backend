@@ -13,6 +13,8 @@ import {
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from './dto';
 import { UserService } from './user.service';
 import { plainToClass } from 'class-transformer';
+import { USER_MESSAGES } from './constants/user-messages.constant';
+import { AUTH_MESSAGES } from '../auth/constants/auth-messages.constant';
 
 @Controller('user')
 export class UserController {
@@ -49,17 +51,17 @@ export class UserController {
   })
   async findById(@Param('id') id: string): Promise<UserResponseDto> {
     if (!id) {
-      throw new BadRequestException('User id is required');
+      throw new BadRequestException(USER_MESSAGES.ID_REQUIRED);
     }
     const user = await this.userService.findById(id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(USER_MESSAGES.NOT_FOUND);
     }
     if (user.isActive === false) {
-      throw new ForbiddenException('User is not active');
+      throw new ForbiddenException(USER_MESSAGES.NOT_ACTIVE);
     }
     if (user.isVerified === false) {
-      throw new ForbiddenException('User is not verified');
+      throw new ForbiddenException(USER_MESSAGES.NOT_VERIFIED);
     }
     return user as UserResponseDto;
   }
@@ -74,8 +76,8 @@ export class UserController {
   async createUser(@Body() user: CreateUserDto): Promise<UserResponseDto> {
     const existingUser = await this.userService.findByEmail(user.email);
     if (existingUser) {
-      throw new ConflictException('User with this email already exists', {
-        description: 'User with this email already exists',
+      throw new ConflictException(AUTH_MESSAGES.USER_ALREADY_EXISTS, {
+        description: AUTH_MESSAGES.USER_ALREADY_EXISTS,
       });
     }
 
@@ -101,7 +103,7 @@ export class UserController {
   ): Promise<UserResponseDto> {
     const existingUser = await this.userService.findById(id);
     if (!existingUser) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(USER_MESSAGES.NOT_FOUND);
     }
     await this.userService.updateUser(id, user);
     return plainToClass(UserResponseDto, existingUser);

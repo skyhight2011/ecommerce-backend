@@ -8,6 +8,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto, ProductResponseDto } from './dto';
 import { ProductStatus } from './enums';
 import { plainToClass } from 'class-transformer';
+import { PRODUCT_MESSAGES } from './constants/product-messages.constant';
 
 @Injectable()
 export class ProductService {
@@ -675,7 +676,7 @@ export class ProductService {
     quantity: number,
   ): Promise<ProductResponseDto> {
     if (quantity < 0) {
-      throw new BadRequestException('Quantity cannot be negative');
+      throw new BadRequestException(PRODUCT_MESSAGES.QUANTITY_NEGATIVE);
     }
 
     const product = await this.prisma.product.findUnique({

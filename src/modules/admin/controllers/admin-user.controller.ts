@@ -27,6 +27,7 @@ import { UserService } from 'src/modules/user/user.service';
 import { UserRole } from 'src/modules/user/enums/user-role.enum';
 import { Roles } from 'src/modules/auth/decorators';
 import { UpdateUserRoleDto, UpdateUserStatusDto } from '../dto';
+import { AUTH_MESSAGES } from 'src/modules/auth/constants/auth-messages.constant';
 
 @ApiTags('admin/users')
 @ApiBearerAuth('JWT')
@@ -90,7 +91,7 @@ export class AdminUserController {
   async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     const existing = await this.userService.findByEmail(dto.email);
     if (existing) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException(AUTH_MESSAGES.USER_ALREADY_EXISTS);
     }
     const user = await this.userService.createUser(dto);
     return plainToInstance(UserResponseDto, user);

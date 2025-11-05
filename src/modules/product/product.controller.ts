@@ -32,6 +32,7 @@ import {
 } from './dto';
 import { Public, Roles } from '../auth/decorators';
 import { UserRole } from 'src/modules/user/enums/user-role.enum';
+import { PRODUCT_MESSAGES } from './constants/product-messages.constant';
 
 @ApiTags('products')
 @Controller('products')
@@ -92,14 +93,14 @@ export class ProductController {
   })
   async findById(@Param('id') id: string): Promise<ProductResponseDto> {
     if (!id) {
-      throw new BadRequestException('Product id is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.ID_REQUIRED);
     }
     const product = await this.productService.findById(id);
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException(PRODUCT_MESSAGES.NOT_FOUND);
     }
     if (!product.isActive) {
-      throw new ForbiddenException('Product is not active');
+      throw new ForbiddenException(PRODUCT_MESSAGES.NOT_ACTIVE);
     }
     return product;
   }
@@ -118,14 +119,14 @@ export class ProductController {
   })
   async findBySlug(@Param('slug') slug: string): Promise<ProductResponseDto> {
     if (!slug) {
-      throw new BadRequestException('Product slug is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.SLUG_REQUIRED);
     }
     const product = await this.productService.findBySlug(slug);
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException(PRODUCT_MESSAGES.NOT_FOUND);
     }
     if (!product.isActive) {
-      throw new ForbiddenException('Product is not active');
+      throw new ForbiddenException(PRODUCT_MESSAGES.NOT_ACTIVE);
     }
     return product;
   }
@@ -150,7 +151,7 @@ export class ProductController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
     if (!categoryId) {
-      throw new BadRequestException('Category id is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.CATEGORY_ID_REQUIRED);
     }
     return this.productService.findByCategory(categoryId, page, limit);
   }
@@ -205,7 +206,7 @@ export class ProductController {
     @Body() updateProductDto: UpdateProductDto,
   ): Promise<ProductResponseDto> {
     if (!id) {
-      throw new BadRequestException('Product id is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.ID_REQUIRED);
     }
     return this.productService.update(id, updateProductDto);
   }
@@ -224,7 +225,7 @@ export class ProductController {
   })
   async delete(@Param('id') id: string): Promise<{ message: string }> {
     if (!id) {
-      throw new BadRequestException('Product id is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.ID_REQUIRED);
     }
     return this.productService.delete(id);
   }
@@ -247,13 +248,13 @@ export class ProductController {
     @Body('status') status: ProductStatus,
   ): Promise<ProductResponseDto> {
     if (!id) {
-      throw new BadRequestException('Product id is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.ID_REQUIRED);
     }
     if (!status) {
-      throw new BadRequestException('Status is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.STATUS_REQUIRED);
     }
     if (!Object.values(ProductStatus).includes(status)) {
-      throw new BadRequestException('Invalid product status');
+      throw new BadRequestException(PRODUCT_MESSAGES.STATUS_INVALID);
     }
     return this.productService.updateStatus(id, status);
   }
@@ -280,10 +281,10 @@ export class ProductController {
     @Body('quantity') quantity: number,
   ): Promise<ProductResponseDto> {
     if (!id) {
-      throw new BadRequestException('Product id is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.ID_REQUIRED);
     }
     if (quantity === undefined || quantity === null) {
-      throw new BadRequestException('Quantity is required');
+      throw new BadRequestException(PRODUCT_MESSAGES.QUANTITY_REQUIRED);
     }
     return this.productService.updateQuantity(id, quantity);
   }

@@ -9,6 +9,7 @@ import { $Enums } from '@prisma/client';
 import { ROLES_KEY } from '../decorators';
 import type { UserRole } from 'src/modules/user/enums/user-role.enum';
 import type { UserFromJwt } from '../strategies';
+import { COMMON_MESSAGES } from 'src/common/constants/common-messages.constant';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -29,7 +30,7 @@ export class RolesGuard implements CanActivate {
       .getRequest<{ user?: UserFromJwt }>();
 
     if (!user?.role) {
-      throw new ForbiddenException('User role is required');
+      throw new ForbiddenException(COMMON_MESSAGES.USER_ROLE_REQUIRED);
     }
 
     if (user.role === $Enums.UserRole.SUPER_ADMIN) {
@@ -40,6 +41,6 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    throw new ForbiddenException('Insufficient permissions');
+    throw new ForbiddenException(COMMON_MESSAGES.PERMISSION_DENIED);
   }
 }

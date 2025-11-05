@@ -8,6 +8,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto, UpdateAddressDto, UpdateUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from './enums/user-role.enum';
+import { USER_MESSAGES } from './constants/user-messages.constant';
 
 @Injectable()
 export class UserService {
@@ -109,7 +110,9 @@ export class UserService {
         updatedAt: new Date(),
       },
     });
-    return { message: 'User deactivated successfully' } as { message: string };
+    return { message: USER_MESSAGES.DEACTIVATED_SUCCESS } as {
+      message: string;
+    };
   }
 
   async updateUserRole(id: string, role: UserRole): Promise<User> {

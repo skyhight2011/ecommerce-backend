@@ -15,6 +15,7 @@ import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, UpdatePasswordDto } from './dto';
 import { CurrentUser, Public } from './decorators';
 import { UserFromJwt } from './strategies';
+import { AUTH_MESSAGES } from './constants/auth-messages.constant';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -63,7 +64,9 @@ export class AuthController {
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
     if (!user || !user.userId) {
-      throw new ForbiddenException('User not found or unauthorized');
+      throw new ForbiddenException(
+        AUTH_MESSAGES.USER_NOT_FOUND_OR_UNAUTHORIZED,
+      );
     }
     return this.authService.updatePassword(user.userId, updatePasswordDto);
   }

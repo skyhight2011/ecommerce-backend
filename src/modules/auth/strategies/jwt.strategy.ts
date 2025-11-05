@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserRole } from 'src/modules/user/enums/user-role.enum';
+import { AUTH_MESSAGES } from '../constants/auth-messages.constant';
 
 export interface JwtPayload {
   sub: string; // user id
@@ -39,7 +40,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user || !user.isActive || !user.isVerified) {
-      throw new UnauthorizedException('User not found or inactive');
+      throw new UnauthorizedException(AUTH_MESSAGES.USER_NOT_FOUND_OR_INACTIVE);
     }
 
     return {

@@ -11,6 +11,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateOrderStatusDto } from '../dto';
+import { COMMON_MESSAGES } from 'src/common/constants/common-messages.constant';
 
 @Injectable()
 export class AdminOrderService {
@@ -113,7 +114,9 @@ export class AdminOrderService {
     }
 
     if (Object.keys(updateData).length === 0) {
-      throw new BadRequestException('At least one field must be provided');
+      throw new BadRequestException(
+        COMMON_MESSAGES.AT_LEAST_ONE_FIELD_REQUIRED,
+      );
     }
 
     try {
