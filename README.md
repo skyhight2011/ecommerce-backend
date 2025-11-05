@@ -36,6 +36,15 @@
   - Register, Login, Update Password flows
   - Prisma ORM with a normalized `User` model
   - Account flags: `isActive`, `isVerified`, `lastLoginAt`
+- Product management
+  - Full CRUD operations for products
+  - Product images, variants, and attributes support
+  - Category-based product organization
+  - Inventory tracking with low stock thresholds
+  - Product status workflow (DRAFT, PUBLISHED, ARCHIVED, OUT_OF_STOCK)
+  - SEO metadata support (meta title, meta description)
+  - Search and filtering capabilities
+  - Pagination support for product listings
 - API documentation
   - Swagger UI at `/api`
   - Named security scheme `JWT` for protected endpoints
@@ -116,6 +125,148 @@ Base URL: `http://localhost:3000`
 1. Register ➜ copy `accessToken`
 2. Click Authorize in `/api`, choose `JWT`, paste token (raw)
 3. Call PUT `/auth/password`
+
+## Product API
+
+Base URL: `http://localhost:3000`
+
+### Get all products
+- GET `/products`
+- Query parameters:
+  - `page` (optional, default: 1) - Page number
+  - `limit` (optional, default: 10) - Items per page
+  - `categoryId` (optional) - Filter by category ID
+  - `status` (optional) - Filter by status: `DRAFT`, `PUBLISHED`, `ARCHIVED`, `OUT_OF_STOCK`
+  - `isActive` (optional, boolean) - Filter by active status
+  - `isFeatured` (optional, boolean) - Filter by featured status
+  - `search` (optional) - Search in name, description, slug, or SKU
+- 200: `{ products: ProductResponseDto[], total: number, page: number, limit: number }`
+- Public endpoint (no authentication required)
+
+### Get product by ID
+- GET `/products/:id`
+- 200: `ProductResponseDto`
+- 404: Product not found
+- Public endpoint (no authentication required)
+
+### Get product by slug
+- GET `/products/slug/:slug`
+- 200: `ProductResponseDto`
+- 404: Product not found
+- Public endpoint (no authentication required)
+
+### Get products by category
+- GET `/products/category/:categoryId`
+- Query parameters:
+  - `page` (optional, default: 1) - Page number
+  - `limit` (optional, default: 10) - Items per page
+- 200: `{ products: ProductResponseDto[], total: number, page: number, limit: number }`
+- 404: Category not found
+- Public endpoint (no authentication required)
+
+### Create product (protected)
+- POST `/products`
+- Headers: `Authorization: Bearer <token>`
+- Body:
+```json
+{
+  "name": "Premium Cotton T-Shirt",
+  "slug": "premium-cotton-t-shirt",
+  "description": "A premium quality cotton t-shirt perfect for everyday wear.",
+  "shortDescription": "Premium cotton t-shirt",
+  "price": "29.99",
+  "comparePrice": "39.99",
+  "costPrice": "15.00",
+  "categoryId": "clx1234567890abcdef",
+  "sku": "PROD-001",
+  "barcode": "1234567890123",
+  "trackQuantity": true,
+  "quantity": 100,
+  "lowStockThreshold": 5,
+  "weight": "0.5",
+  "dimensions": { "length": 30, "width": 25, "height": 5 },
+  "material": "100% Cotton",
+  "brand": "BrandName",
+  "status": "DRAFT",
+  "isActive": true,
+  "isDigital": false,
+  "isFeatured": false,
+  "metaTitle": "Premium Cotton T-Shirt - BrandName",
+  "metaDescription": "Shop premium cotton t-shirts online.",
+  "images": [
+    {
+      "url": "https://example.com/product-image.jpg",
+      "alt": "Product main image",
+      "sortOrder": 0,
+      "isPrimary": true
+    }
+  ],
+  "variants": [
+    {
+      "name": "Red - Large",
+      "sku": "PROD-001-RED-L",
+      "price": "29.99",
+      "quantity": 50,
+      "attributes": { "color": "red", "size": "large" },
+      "isActive": true
+    }
+  ],
+  "attributes": [
+    {
+      "name": "Color",
+      "value": "Red",
+      "sortOrder": 0
+    }
+  ]
+}
+```
+- 201: `ProductResponseDto`
+- 400: Invalid input data
+- 404: Category not found
+- 409: Product with slug, SKU, or barcode already exists
+
+### Update product (protected)
+- PUT `/products/:id`
+- Headers: `Authorization: Bearer <token>`
+- Body: Same as create, but all fields are optional (except slug cannot be updated)
+- 200: `ProductResponseDto`
+- 404: Product not found
+- 409: Product with SKU or barcode already exists
+
+### Delete product (protected)
+- DELETE `/products/:id`
+- Headers: `Authorization: Bearer <token>`
+- 200: `{ "message": "Product archived successfully" }`
+- 404: Product not found
+- Note: This performs a soft delete by setting status to `ARCHIVED` and `isActive` to `false`
+
+### Update product status (protected)
+- PATCH `/products/:id/status`
+- Headers: `Authorization: Bearer <token>`
+- Body:
+```json
+{
+  "status": "PUBLISHED"
+}
+```
+- Valid statuses: `DRAFT`, `PUBLISHED`, `ARCHIVED`, `OUT_OF_STOCK`
+- 200: `ProductResponseDto`
+- 404: Product not found
+- Note: Setting status to `PUBLISHED` automatically sets `publishedAt` timestamp
+
+### Update product quantity (protected)
+- PATCH `/products/:id/quantity`
+- Headers: `Authorization: Bearer <token>`
+- Body:
+```json
+{
+  "quantity": 150
+}
+```
+- 200: `ProductResponseDto`
+- 400: Invalid quantity (must be >= 0)
+- 404: Product not found
+- Note: Automatically updates status to `OUT_OF_STOCK` if quantity is 0, or to `PUBLISHED` if quantity > 0 and previous status was `OUT_OF_STOCK`
 
 ## Project setup
 

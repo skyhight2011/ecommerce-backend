@@ -1,15 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto, UpdateAddressDto, UpdateUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
+import { UserRole } from './enums/user-role.enum';
+import { USER_MESSAGES } from './constants/user-messages.constant';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+  async findAll(filters?: {
+    role?: UserRole;
+    isActive?: boolean;
+    isVerified?: boolean;
+    search?: string;
+  }): Promise<User[]> {
+    const where: Prisma.UserWhereInput = {};
+
+    if (filters?.role) {
+      where.role = filters.role;
+    }
+
+    if (filters?.isActive !== undefined) {
+      where.isActive = filters.isActive;
+    }
+
+    if (filters?.isVerified !== undefined) {
+      where.isVerified = filters.isVerified;
+    }
+
+    if (filters?.search) {
+      where.OR = [
+        { email: { contains: filters.search, mode: 'insensitive' } },
+        { firstName: { contains: filters.search, mode: 'insensitive' } },
+        { lastName: { contains: filters.search, mode: 'insensitive' } },
+        { phone: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    return this.prisma.user.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findById(id: string): Promise<User | null> {
@@ -73,7 +110,54 @@ export class UserService {
         updatedAt: new Date(),
       },
     });
-    return { message: 'User deactivated successfully' } as { message: string };
+    return { message: USER_MESSAGES.DEACTIVATED_SUCCESS } as {
+      message: string;
+    };
+  }
+
+  async updateUserRole(id: string, role: UserRole): Promise<User> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return this.prisma.user.update({
+      where: { id },
+      data: { role },
+    });
+  }
+
+  async updateUserStatus(
+    id: string,
+    status: { isActive?: boolean; isVerified?: boolean },
+  ): Promise<User> {
+    const updateData: Prisma.UserUpdateInput = {};
+
+    if (status.isActive !== undefined) {
+      updateData.isActive = status.isActive;
+    }
+
+    if (status.isVerified !== undefined) {
+      updateData.isVerified = status.isVerified;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException(
+        'At least one status field must be provided',
+      );
+    }
+
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data: updateData,
+      });
+    } catch {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
   }
 
   private generateUsernameFromEmail(email: string): string {

@@ -12,6 +12,9 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserRole } from 'src/modules/user/enums/user-role.enum';
+import { AUTH_MESSAGES } from './constants/auth-messages.constant';
+import { USER_MESSAGES } from 'src/modules/user/constants/user-messages.constant';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +31,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException(AUTH_MESSAGES.USER_ALREADY_EXISTS);
     }
 
     // Hash password
@@ -71,18 +74,18 @@ export class AuthService {
       where: { email: loginDto.email },
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (!user?.email) {
+      throw new UnauthorizedException(AUTH_MESSAGES.INVALID_CREDENTIALS);
     }
 
     // Check if account is active
-    if (!user.isActive) {
-      throw new UnauthorizedException('Account is not active');
+    if (!user?.isActive) {
+      throw new UnauthorizedException(AUTH_MESSAGES.ACCOUNT_INACTIVE);
     }
 
     // Check if account is verified (optional, depends on your requirements)
-    if (!user.isVerified) {
-      throw new UnauthorizedException('Please verify your email first');
+    if (!user?.isVerified) {
+      throw new UnauthorizedException(AUTH_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
     // Verify password
@@ -92,7 +95,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(AUTH_MESSAGES.INVALID_CREDENTIALS);
     }
 
     // Update last login time
@@ -121,7 +124,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(USER_MESSAGES.NOT_FOUND);
     }
 
     // Verify current password
@@ -131,7 +134,7 @@ export class AuthService {
     );
 
     if (!isCurrentPasswordValid) {
-      throw new UnauthorizedException('Current password is incorrect');
+      throw new UnauthorizedException(AUTH_MESSAGES.CURRENT_PASSWORD_INCORRECT);
     }
 
     // Check if new password is different from current
@@ -141,9 +144,7 @@ export class AuthService {
     );
 
     if (isSamePassword) {
-      throw new BadRequestException(
-        'New password must be different from current password',
-      );
+      throw new BadRequestException(AUTH_MESSAGES.NEW_PASSWORD_DIFFERENT);
     }
 
     // Hash new password
@@ -158,7 +159,7 @@ export class AuthService {
       data: { password: hashedNewPassword },
     });
 
-    return { message: 'Password updated successfully' };
+    return { message: AUTH_MESSAGES.PASSWORD_UPDATE_SUCCESS };
   }
 
   async validateUser(email: string, password: string) {
@@ -179,7 +180,7 @@ export class AuthService {
     return user;
   }
 
-  private generateToken(userId: string, email: string, role: string): string {
+  private generateToken(userId: string, email: string, role: UserRole): string {
     const payload = { sub: userId, email, role };
     return this.jwtService.sign(payload);
   }

@@ -92,7 +92,7 @@ export class CreateUserDto {
   @ApiPropertyOptional({
     description: 'User role',
     enum: UserRole,
-    default: UserRole.CUSTOMER,
+    default: UserRole.USER,
   })
   @IsOptional()
   @IsEnum(UserRole, { message: 'Role must be a valid user role' })
@@ -124,4 +124,7 @@ export class CreateUserDto {
   })
   @IsOptional()
   preferences?: Record<string, any>;
+
+  @IsOptional()
+  isVerified?: boolean;
 }

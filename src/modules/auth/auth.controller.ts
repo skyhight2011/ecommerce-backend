@@ -3,7 +3,6 @@ import {
   Post,
   Put,
   Body,
-  UseGuards,
   ForbiddenException,
 } from '@nestjs/common';
 import {
@@ -14,9 +13,9 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, UpdatePasswordDto } from './dto';
-import { JwtAuthGuard } from './guards';
-import { CurrentUser } from './decorators';
+import { CurrentUser, Public } from './decorators';
 import { UserFromJwt } from './strategies';
+import { AUTH_MESSAGES } from './constants/auth-messages.constant';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -24,6 +23,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Public()
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: 201,
@@ -38,21 +38,17 @@ export class AuthController {
   }
 
   @Post('login')
+  @Public()
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiResponse({
     status: 200,
     description: 'User logged in successfully',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid credentials',
   })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
   @Put('password')
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Update user password' })
   @ApiResponse({
@@ -68,7 +64,9 @@ export class AuthController {
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
     if (!user || !user.userId) {
-      throw new ForbiddenException('User not found or unauthorized');
+      throw new ForbiddenException(
+        AUTH_MESSAGES.USER_NOT_FOUND_OR_UNAUTHORIZED,
+      );
     }
     return this.authService.updatePassword(user.userId, updatePasswordDto);
   }
