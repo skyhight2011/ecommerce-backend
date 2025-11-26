@@ -44,6 +44,10 @@ $ pnpm run start:dev
 $ pnpm run start:prod
 ```
 
+## API documentation
+
+While the server is running (default port 3000), visit `http://localhost:3000/api/docs` to explore the OpenAPI Swagger UI that was added in this task.
+
 ## Run tests
 
 ```bash
