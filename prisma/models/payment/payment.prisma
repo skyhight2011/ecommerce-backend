@@ -1,0 +1,19 @@
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  amount    Decimal  @db.Decimal(10, 2)
+  status    String   @default("PENDING") // Using enum from shared/enums.prisma
+  method    String? // Using enum from shared/enums.prisma
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
+  @@map("payments")
+}

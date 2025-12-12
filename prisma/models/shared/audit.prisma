@@ -1,0 +1,2 @@
+// Audit fields that can be mixed into other models
+// Note: Prisma doesn't support mixins directly, so these fields should be added to each model that needs them

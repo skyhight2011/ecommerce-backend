@@ -1,0 +1,22 @@
+model Order {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  status          String   @default("PENDING") // Using enum from shared/enums.prisma
+  totalAmount     Decimal  @db.Decimal(10, 2)
+  shippingAddress Json // Store address as JSON
+  billingAddress  Json?
+  shippingCost    Decimal  @default(0) @db.Decimal(10, 2)
+  taxAmount       Decimal  @default(0) @db.Decimal(10, 2)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  items    OrderItem[]
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}

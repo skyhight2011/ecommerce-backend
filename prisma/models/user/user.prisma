@@ -1,0 +1,21 @@
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile?
+  roleId  Int?
+  role    Role?    @relation(fields: [roleId], references: [id])
+
+  // Relations to other domains
+  orders   Order[]
+  carts    Cart[]
+  payments Payment[]
+
+  @@index([email])
+  @@index([roleId])
+  @@map("users")
+}

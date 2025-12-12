@@ -1,0 +1,23 @@
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  sku         String   @unique
+  price       Decimal  @db.Decimal(10, 2)
+  status      String   @default("DRAFT") // Using enum from shared/enums.prisma
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  variants   ProductVariant[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([slug])
+  @@index([sku])
+  @@index([categoryId])
+  @@index([status])
+  @@map("products")
+}

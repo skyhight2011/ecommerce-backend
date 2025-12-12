@@ -1,0 +1,18 @@
+model Transaction {
+  id              String   @id @default(cuid())
+  paymentId       String
+  payment         Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  type            String // Using enum from shared/enums.prisma
+  amount          Decimal  @db.Decimal(10, 2)
+  status          String   @default("PENDING") // Using enum from shared/enums.prisma
+  externalId      String? // ID from payment gateway (Stripe, PayPal, etc.)
+  gatewayResponse Json? // Full response from payment gateway
+  failureReason   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([externalId])
+  @@index([status])
+  @@map("transactions")
+}
